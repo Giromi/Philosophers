@@ -6,86 +6,81 @@
 /*   By: minsuki2 <minsuki2@student.42seoul.kr      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/17 07:56:13 by minsuki2          #+#    #+#             */
-/*   Updated: 2022/08/17 10:48:41 by minsuki2         ###   ########.fr       */
+/*   Updated: 2022/08/17 14:49:41 by minsuki2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-static void	philo_print(t_philo *philo, t_info *info, int idx, char *str)
+static int	philo_print(t_philo *philo, int idx, char *str, int eat_status)
 {
-	pthread_mutex_lock(&info->mutex.print);
-	if (info->stat.end == 0)
-		printf("%ld %d %s\n", get_time() - info->birth_t, idx + 1, str);
-	if (strstr(str, "is eating"))
+	size_t	now_t;
+
+	pthread_mutex_lock(&philo->info->mutex.print);
+	if (philo->info->stat.end == 0)
 	{
-		philo->last_eat_t = get_time();
-		if (++(philo->cnt_eat) == philo->info->arg.must_eat)
+		now_t = get_time();
+		printf("%ld %d %s\n", now_t - philo->info->birth_t, idx + 1, str);
+		if (eat_status)
 		{
-			philo->info->stat.n_full++;
-			if (philo->info->stat.n_full == philo->info->arg.n_philo)
-				philo->info->stat.end++;
+			philo->last_eat_t = now_t;
+			if (++(philo->cnt_eat) == philo->info->arg.must_eat)
+			{
+				philo->info->stat.n_full++;
+				if (philo->info->stat.n_full == philo->info->arg.n_philo)
+					philo->info->stat.end++;
+			}
 		}
 	}
-	pthread_mutex_unlock(&info->mutex.print);
+	else
+	{
+		pthread_mutex_unlock(&philo->info->mutex.print);
+		return (ERROR);
+	}
+	pthread_mutex_unlock(&philo->info->mutex.print);
+	return (SUCCESS);
 }
 
 static int	take_fork(t_philo *philo)
 {
-	int	kill_;
-
-	pthread_mutex_lock(&philo->info->mutex.print);
-	kill_= philo->info->stat.end;
-	pthread_mutex_unlock(&philo->info->mutex.print);
-	if (kill_)
-		return(ERROR);
 	if (philo->idx % 2 == 0)
 	{
-		pthread_mutex_lock(philo->left);
-		philo_print(philo, philo->info, philo->idx, "has taken a fork");
-		pthread_mutex_lock(philo->right);
-		philo_print(philo, philo->info, philo->idx, "has taken a fork");
+		pthread_mutex_lock(philo->mtx_left);
+		if (philo_print(philo, philo->idx, "has taken a fork", 0))
+			return (ERROR);
+		pthread_mutex_lock(philo->mtx_right);
+		if (philo_print(philo, philo->idx, "has taken a fork", 0))
+			return (ERROR);
 	}
 	else
 	{
-		pthread_mutex_lock(philo->right);
-		philo_print(philo, philo->info, philo->idx, "has taken a fork");
-		pthread_mutex_lock(philo->left);
-		philo_print(philo, philo->info, philo->idx, "has taken a fork");
+		pthread_mutex_lock(philo->mtx_right);
+		if (philo_print(philo, philo->idx, "has taken a fork", 0))
+			return (ERROR);
+		pthread_mutex_lock(philo->mtx_left);
+		if (philo_print(philo, philo->idx, "has taken a fork", 0))
+			return (ERROR);
 	}
 	return (SUCCESS);
 }
 
 static int	eating(t_philo *philo, t_arg *arg)
 {
-	int	kill_;
-
-	pthread_mutex_lock(&philo->info->mutex.print);
-	kill_= philo->info->stat.end;
-	pthread_mutex_unlock(&philo->info->mutex.print);
-	if (kill_)
-		return(ERROR);
-	philo_print(philo, philo->info, philo->idx, "is eating");
+	if (philo_print(philo, philo->idx, "is eating", EATTING))
+		return (ERROR);
 	smart_timer(arg->eat_time);
 	return (SUCCESS);
 }
 
 static int	sleep_thinking(t_philo *philo, t_arg *arg)
 {
-	int	kill_;
-
-	pthread_mutex_lock(&philo->info->mutex.print);
-	kill_= philo->info->stat.end;
-	pthread_mutex_unlock(&philo->info->mutex.print);
-
-	pthread_mutex_unlock(philo->right);
-	pthread_mutex_unlock(philo->left);
-	if (kill_)
-		return(ERROR);
-	philo_print(philo, philo->info, philo->idx, "is sleeping");
+	pthread_mutex_unlock(philo->mtx_right);
+	pthread_mutex_unlock(philo->mtx_left);
+	if (philo_print(philo, philo->idx, "is sleeping", 0))
+		return (ERROR);
 	smart_timer(arg->sleep_time);
-	philo_print(philo, philo->info, philo->idx, "is thinking");
-	// usleep(10);
+	if (philo_print(philo, philo->idx, "is thinking", 0))
+		return (ERROR);
 	return (SUCCESS);
 }
 
@@ -95,7 +90,7 @@ void	*action(void *param)
 	philo = (t_philo *)param;
 
 	pthread_mutex_lock(&philo->info->mutex.print);
-	philo->last_eat_t = get_time();
+	(*philo).last_eat_t = get_time();
 	pthread_mutex_unlock(&philo->info->mutex.print);
 	if (philo->idx % 2 != 0)
 		smart_timer(philo->info->arg.eat_time / 2);

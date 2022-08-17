@@ -47,14 +47,15 @@ typedef struct s_philo
 	int				cnt_eat;
 	size_t			last_eat_t;
 	t_info			*info;
-	pthread_mutex_t	*left;
-	pthread_mutex_t	*right;
+	pthread_mutex_t	*mtx_left;
+	pthread_mutex_t	*mtx_right;
 }	t_philo;
 
 enum e_enum
 {
 	ERROR = -1,
-	SUCCESS
+	SUCCESS,
+	EATTING
 };
 
 size_t		get_time();

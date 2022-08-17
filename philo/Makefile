@@ -6,14 +6,14 @@
 #    By: minsuki2 <minsuki2@student.42seoul.kr      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/08/17 02:03:01 by minsuki2          #+#    #+#              #
-#    Updated: 2022/08/17 10:05:30 by minsuki2         ###   ########.fr        #
+#    Updated: 2022/08/17 14:50:48 by minsuki2         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC = cc
 NAME = philo
 CFLAGS = -Wall -Werror -Wextra
-# CFLAGS = -Wall -Werror -Wextra -fsanitize=thread
+# CFLAGS = -Wall -Werror -Wextra -fsanitize=thread -g
 # CFLAGS = -Wall -Werror -Wextra -fsanitize=address
 
 SRCS = philo.c			\

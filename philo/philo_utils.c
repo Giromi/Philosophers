@@ -6,18 +6,18 @@
 /*   By: minsuki2 <minsuki2@student.42seoul.kr      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/17 07:54:49 by minsuki2          #+#    #+#             */
-/*   Updated: 2022/08/17 10:54:17 by minsuki2         ###   ########.fr       */
+/*   Updated: 2022/08/17 14:10:35 by minsuki2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-size_t	get_time()
+size_t	get_time(void)
 {
 	struct timeval	time;
 
 	gettimeofday(&time, NULL);
-	return(time.tv_sec * 1000 + time.tv_usec / 1000);
+	return (time.tv_sec * 1000 + time.tv_usec / 1000);
 }
 
 void	smart_timer(int time)
@@ -25,46 +25,46 @@ void	smart_timer(int time)
 	size_t	start;
 
 	start = get_time();
-	while (get_time() < time + start )
+	while (get_time() < time + start)
 		usleep(100);
 }
 
 void	monitor(t_philo *philo)
 {
-	int	i;
-	int	kill_;
+	int		i;
+	int		end_f;
+	size_t	now_t;
 
-	kill_ = 0;
 	while (1)
 	{
-		i = 0;
-		while (i < philo->info->arg.n_philo)
+		i = -1;
+		while (++i < philo->info->arg.n_philo)
 		{
 			pthread_mutex_lock(&philo->info->mutex.print);
-			kill_ = philo->info->stat.end;
-			if (get_time() > philo->info->arg.die_time + philo[i].last_eat_t )
+			end_f = philo->info->stat.end;
+			now_t = get_time();
+			if (now_t > philo->info->arg.die_time + philo[i].last_eat_t)
 			{
 				philo->info->stat.end++;
-				printf("%ld %d died\n", get_time() - philo->info->birth_t, i + 1);
+				printf("%ld %d died\n", now_t - philo->info->birth_t, i + 1);
 				pthread_mutex_unlock(&philo->info->mutex.print);
 				return ;
 			}
 			else
 				pthread_mutex_unlock(&philo->info->mutex.print);
-			if (kill_)
+			if (end_f)
 				return ;
-			++i;
 		}
 	}
 }
 
 void	mutex_free(t_philo *philo, t_mutex *mutex)
 {
-	int i;
+	int	i;
 
 	i = -1;
 	while (++i < philo->info->arg.n_philo)
-		pthread_mutex_destroy(philo[i].left);
+		pthread_mutex_destroy(philo[i].mtx_left);
 	pthread_mutex_destroy(&mutex->print);
 	free((*mutex).fork);
 	free(philo);
