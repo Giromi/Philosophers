@@ -8,8 +8,8 @@
 # include <sys/time.h>
 # include <pthread.h>
 
-# define INT_MAX			2147483647
-# define INT_MIN			-2147483648
+# define VAL_INT_MAX			2147483647
+# define VAL_INT_MIN			2147483648
 
 typedef struct s_status
 {
@@ -26,7 +26,7 @@ typedef struct s_mutex
 typedef struct s_arg
 {
 	int	n_philo;
-	size_t die_time;
+	int die_time;
 	int eat_time;
 	int sleep_time;
 	int must_eat;
@@ -57,5 +57,11 @@ enum e_enum
 	SUCCESS
 };
 
-long long	ft_atoi(const	char	*str);
+size_t		get_time();
+void		smart_timer(int time);
+void		monitor(t_philo *philo);
+void		mutex_free(t_philo *philo, t_mutex *mutex);
+void		*action(void *param);
+int			ft_postive_atoi(const char *str);
+int			ft_error(char *str);
 #endif

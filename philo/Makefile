@@ -1,21 +1,36 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: minsuki2 <minsuki2@student.42seoul.kr      +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2022/08/17 02:03:01 by minsuki2          #+#    #+#              #
+#    Updated: 2022/08/17 10:05:30 by minsuki2         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 CC = cc
-
 NAME = philo
-
 CFLAGS = -Wall -Werror -Wextra
 # CFLAGS = -Wall -Werror -Wextra -fsanitize=thread
+# CFLAGS = -Wall -Werror -Wextra -fsanitize=address
 
-SRCS = philo.c ft_atoi.c
+SRCS = philo.c			\
+	   philo_utils.c	\
+	   routine.c		\
+	   print_out.c		\
+	   ft_postive_atoi.c
 
 OBJS = $(SRCS:.c=.o)
 
+all : $(NAME)
+
 $(NAME): $(OBJS)
-	$(CC) $(CFLAGS) -lpthread $(OBJS) -o $(NAME)
+	$(CC) $(CFLAGS) $^ -lpthread -o $@
 
 %.o : %.c
-	$(CC) $(CFLAGS) -g -c $< -o $@
-
-all : $(NAME)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	$(RM) $(OBJS)
@@ -23,12 +38,8 @@ clean:
 fclean: clean
 	$(RM) $(NAME)
 
-debug: all
-	$(CC) -lpthread $(OBJS) -o $(NAME)
-#$(CC) -lpthread $(OBJS) -o $(NAME) -fsanitize=address
-
-lldb: all
-	$(CC) $(CFLAGS) -lpthread $(SRCS) -o $(NAME) -g3
+lldb: $(NAME)
+	$(CC) $(CFLAGS) $(SRCS) -g -lpthread -o $(NAME)
 
 re:
 	make fclean
