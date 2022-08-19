@@ -1,26 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo_bonus.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: minsuki2 <minsuki2@student.42seoul.kr      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/08/19 23:36:51 by minsuki2          #+#    #+#             */
+/*   Updated: 2022/08/20 01:55:36 by minsuki2         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo_bonus.h"
 
-size_t	get_time()
-{
-	struct timeval	time;
-
-	if(gettimeofday(&time, NULL) == ERROR)
-		return (ERROR);
-	return(time.tv_sec * 1000 + time.tv_usec / 1000);
-}
-
-void	smart_timer(size_t time)
-{
-	size_t	start;
-
-	start = get_time();
-	// if (start == ERROR)
-		// return (ERROR);
-	while (get_time() - start < time)
-		usleep(100);
-}
-
-void *eat_checker(void *param)
+void	*eat_checker(void *param)
 {
 	int		i;
 	t_philo	*philo;
@@ -32,189 +24,97 @@ void *eat_checker(void *param)
 		sem_wait(philo->info.sema.eat_checker);
 		if (i + 1 == philo->info.arg.n_philo)
 			break ;
-    	sem_post(philo->info.sema.print);
+		sem_post(philo->info.sema.print);
 	}
-	// sem_wait(philo->info.sema.print);
 	i = -1;
 	while (++i < philo->info.arg.n_philo)
 		kill(philo->info.pid[i], SIGKILL);
-    // sem_post(philo->info.sema.print);			// 세마포어 종료 및 할당한 자원 해제
-    sem_close(philo->info.sema.eat_checker);			// 세마포어 종료 및 할당한 자원 해제
-	sem_unlink("eat_checker"); 							// 세마포어 객체 해제 제거
+	sem_close(philo->info.sema.eat_checker);
+	sem_unlink("eat_checker");
 	return (NULL);
 }
 
-void	philo_print(t_philo *philo, t_info *info, int idx, char *str)
+int	init_info(int argc, t_philo *philo, t_info *info, t_arg *arg)
 {
-	sem_wait(philo->info.sema.print);
-	printf("%ld %d %s\n", get_time() - info->birth_t, idx + 1, str);
-	if (strstr(str, "is eating"))
-	{
-		philo->last_eat_t = get_time();
-		if (++(philo->eat_cnt) == info->arg.must_eat)
-		{
-			sem_post(info->sema.eat_checker);
-			return ;
-		}
-	}
-	sem_post(philo->info.sema.print);
-}
+	int	idx;
 
-int take_fork(t_philo *philo)
-{
-	sem_wait(philo->info.sema.fork);
-	philo_print(philo, &philo->info, philo->idx, "has taken a fork");
-	sem_wait(philo->info.sema.fork);
-	philo_print(philo, &philo->info, philo->idx, "has taken a fork");
-	return (SUCCESS);
-}
-
-int	eating(t_philo *philo)
-{	
-	philo_print(philo, &philo->info, philo->idx, "is eating");
-	smart_timer((*philo).info.arg.eat_time);
-	return (SUCCESS);
-}
-
-int	sleep_thinking(t_philo *philo)
-{
-	sem_post(philo->info.sema.fork);
-	sem_post(philo->info.sema.fork);
-	philo_print(philo, &philo->info, philo->idx, "is sleeping");
-	smart_timer(philo->info.arg.sleep_time);
-	philo_print(philo, &philo->info, philo->idx, "is thinking");
-	return (SUCCESS);
-}
-
-void	*monitor(void *param)
-{
-	size_t	now_t;
-
-	t_philo	*const philo  = (t_philo *)param;
-	
-	while (1)
-	{
-		sem_wait(philo->info.sema.print);
-		now_t = get_time();
-		if (now_t > philo->info.arg.die_time + philo->last_eat_t)
-		{
-			printf("%lu %d died\n", now_t - (*philo).info.birth_t, philo->idx + 1);
-			exit(1);
-		}
-		sem_post(philo->info.sema.print);
-	}
-	return (NULL);
-}
-
-void action(t_philo philo)
-{
-	pthread_t	tid;
-
-	//pthread_create(&tid, NULL, monitor, &philo);
-	// sem_wait(philo.info.sema.print);
-	philo.last_eat_t = get_time();
-	pthread_create(&tid, NULL, monitor, &philo);
-	// sem_post(philo.info.sema.print);
-	while (!take_fork(&philo)
-			&& !eating(&philo)
-			&& !sleep_thinking(&philo));
-	exit(1);
-}
-
-int init_philo(t_philo *philo, t_info *info, t_arg *arg)
-{
-	(*philo).last_eat_t = get_time();
-	info->sema.fork = sem_open("sem_fork", O_CREAT | O_EXCL, 0644, arg->n_philo);
-	if (info->sema.fork == SEM_FAILED)
-	{
-		sem_unlink("sem_fork");
-		info->sema.fork = sem_open("sem_fork", O_CREAT | O_EXCL, 0644, arg->n_philo);
-	}
+	sem_unlink("sem_fork");
+	info->sema.fork = sem_open("sem_fork", O_CREAT | O_EXCL, 0644 \
+			, arg->n_philo);
+	sem_unlink("sem_print");
 	info->sema.print = sem_open("sem_print", O_CREAT | O_EXCL, 0644, 1);
-	if (info->sema.print == SEM_FAILED)
+	sem_unlink("sem_eat_checker");
+	if (argc == 6)
+		info->sema.eat_checker = sem_open("sem_eat_checker", O_CREAT | O_EXCL \
+				, 0644, 0);
+	idx = 0;
+	info->birth_t = get_time();
+	while (idx < info->arg.n_philo)
 	{
-		sem_unlink("sem_print");
-		info->sema.print = sem_open("sem_print", O_CREAT | O_EXCL, 0644, 1);
-	}
-	info->sema.eat_checker = sem_open("eat_checker", O_CREAT | O_EXCL, 0644, 0);
-	if (info->sema.eat_checker == SEM_FAILED)
-	{
-		sem_unlink("eat_checker");
-		info->sema.eat_checker = sem_open("eat_checker", O_CREAT | O_EXCL, 0644, 0);
+		info->pid[idx] = fork();
+		if (info->pid[idx] == 0)
+			action(*philo);
+		philo->idx = ++idx;
 	}
 	return (SUCCESS);
 }
 
-int	parse_arg(int argc, char **argv, t_info *info)
+static int	parse_arg(int argc, char **argv, t_info *info)
 {
 	if (!(argc == 5 || argc == 6))
-		return (ERROR);
-	info->arg.n_philo = atoi(argv[1]);
-	info->arg.die_time = atoi(argv[2]);
-	info->arg.eat_time = atoi(argv[3]);
-	info->arg.sleep_time = atoi(argv[4]);
+		return (ft_error("argument count"));
+	info->arg.n_philo = ft_postive_atoi(argv[1]);
+	if (info->arg.n_philo <= 0)
+		return (ft_error("philosophers_n argument"));
+	info->arg.die_time = ft_postive_atoi(argv[2]);
+	info->arg.eat_time = ft_postive_atoi(argv[3]);
+	info->arg.sleep_time = ft_postive_atoi(argv[4]);
+	if (info->arg.die_time <= 0 || info->arg.eat_time <= 0
+		|| info->arg.sleep_time <= 0)
+		return (ft_error("time argument"));
+	info->arg.must_eat = 0;
 	if (argc == 6)
+	{
 		info->arg.must_eat = atoi(argv[5]);
-	else
-		info->arg.must_eat = 0;
-	if (info->arg.n_philo <= 0 || info->arg.die_time <= 0 || info->arg.eat_time < 0 || info->arg.sleep_time < 0 || info->arg.must_eat < 0)
-		return (ERROR);
+		if (info->arg.must_eat <= 0)
+			return (ft_error("must_eat_n argument"));
+	}
 	return (SUCCESS);
 }
 
-void only_exit();
+void	sema_fclean(t_info *info, t_sem *sema, t_arg *arg)
+{
+	int	i;
+
+	waitpid(-1, 0, 0);
+	i = -1;
+	while (++i < arg->n_philo)
+		kill(info->pid[i], SIGKILL);
+	sem_close(sema->fork);
+	sem_close(sema->print);
+	sem_unlink("sem_fork");
+	sem_unlink("sem_print");
+	free(info->pid);
+	while (--i)
+		waitpid(-1, 0, 0);
+}
 
 int	main(int argc, char **argv)
 {
-	atexit(only_exit);
-	int			idx;
-	pid_t		*pid;
 	t_philo		philo;
 	pthread_t	tid_eatchecker;
 
 	memset(&philo, 0, sizeof(t_philo));
 	if (parse_arg(argc, argv, &philo.info) == ERROR)
 		return (ERROR);
-	pid = malloc(sizeof(pid_t) * philo.info.arg.n_philo);
-	if (init_philo(&philo, &philo.info, &philo.info.arg) == ERROR)
+	philo.info.pid = malloc(sizeof(pid_t) * philo.info.arg.n_philo);
+	if (!philo.info.pid)
 		return (ERROR);
-	idx = 0;
-
-	philo.info.birth_t = get_time();
-	while (idx < philo.info.arg.n_philo)
-	{
-		pid[idx] = fork();
-		if (pid[idx] == 0)
-			action(philo);
-		philo.idx = ++idx;
-	}
-	philo.info.pid = pid;
-	// sem_post(philo.info.sema.print);
-
-	if (argc == 6)
+	if (!init_info(argc, &philo, &philo.info, &philo.info.arg) && argc == 6)
 	{
 		pthread_create(&tid_eatchecker, NULL, eat_checker, &philo);
 		pthread_detach(tid_eatchecker);
 	}
-	waitpid(-1, 0, 0);
-	//sem_post(philo.info.sema.print);
-	idx = -1;
-	while (++idx < philo.info.arg.n_philo)
-	{
-		kill(pid[idx], SIGKILL);
-		// printf("%d\n", pid[idx]);
-	}
-    sem_close(philo.info.sema.fork);	// 세마포어 종료 및 할당한 자원 해제
-    sem_close(philo.info.sema.print);	// 세마포어 종료 및 할당한 자원 해제
-	sem_unlink("sem_fork"); 			// 세마포어 객체 해제 제거
-	sem_unlink("sem_print"); 			// 세마포어 객체 해제 제거
-	free(pid);
-	while (idx--)		// n - 1번
-		waitpid(-1, 0, 0);
+	sema_fclean(&philo.info, &philo.info.sema, &philo.info.arg);
 	return (0);
-}
-
-void only_exit()
-{
-	system("leak -q philo_bonus");
 }
