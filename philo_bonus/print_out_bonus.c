@@ -6,18 +6,18 @@
 /*   By: minsuki2 <minsuki2@student.42seoul.kr      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/17 08:40:39 by minsuki2          #+#    #+#             */
-/*   Updated: 2022/08/20 01:59:17 by minsuki2         ###   ########.fr       */
+/*   Updated: 2022/08/20 03:16:23 by minsuki2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
 
-void	ft_putchar_fd(char c, int fd)
+static void	ft_putchar_fd(char c, int fd)
 {
 	write(fd, &c, 1);
 }
 
-void	ft_putstr_fd(const char *s, int fd)
+static void	ft_putstr_fd(const char *s, int fd)
 {
 	while (*s)
 	{
@@ -26,7 +26,7 @@ void	ft_putstr_fd(const char *s, int fd)
 	}
 }
 
-void	ft_putendl_fd(const char *s, int fd)
+static void	ft_putendl_fd(const char *s, int fd)
 {
 	if (fd >= 0 && s)
 	{

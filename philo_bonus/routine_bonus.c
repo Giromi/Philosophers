@@ -6,13 +6,13 @@
 /*   By: minsuki2 <minsuki2@student.42seoul.kr      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 23:16:11 by minsuki2          #+#    #+#             */
-/*   Updated: 2022/08/20 01:58:15 by minsuki2         ###   ########.fr       */
+/*   Updated: 2022/08/20 03:33:33 by minsuki2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
 
-void	philo_print(t_philo *philo, int idx, char *str, int eat_status)
+static void	philo_print(t_philo *philo, int idx, char *str, int eat_status)
 {
 	size_t	now_t;
 
@@ -31,7 +31,7 @@ void	philo_print(t_philo *philo, int idx, char *str, int eat_status)
 	sem_post(philo->info.sema.print);
 }
 
-int	take_fork(t_philo *philo)
+static int	take_fork(t_philo *philo)
 {
 	sem_wait(philo->info.sema.fork);
 	philo_print(philo, philo->idx, "has taken a fork", 0);
@@ -40,14 +40,14 @@ int	take_fork(t_philo *philo)
 	return (SUCCESS);
 }
 
-int	eating(t_philo *philo)
+static int	eating(t_philo *philo)
 {
 	philo_print(philo, philo->idx, "is eating", EATTING);
 	smart_timer((*philo).info.arg.eat_time);
 	return (SUCCESS);
 }
 
-int	sleep_thinking(t_philo *philo)
+static int	sleep_thinking(t_philo *philo)
 {
 	sem_post(philo->info.sema.fork);
 	sem_post(philo->info.sema.fork);

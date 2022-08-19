@@ -6,58 +6,11 @@
 /*   By: minsuki2 <minsuki2@student.42seoul.kr      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 23:36:51 by minsuki2          #+#    #+#             */
-/*   Updated: 2022/08/20 02:40:19 by minsuki2         ###   ########.fr       */
+/*   Updated: 2022/08/20 03:41:12 by minsuki2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
-
-void	*eat_checker(void *param)
-{
-	int		i;
-	t_philo	*philo;
-
-	philo = (t_philo *)param;
-	i = -1;
-	while (++i < philo->info.arg.n_philo)
-	{
-		sem_wait(philo->info.sema.eat_checker);
-		if (i + 1 == philo->info.arg.n_philo)
-			break ;
-		sem_post(philo->info.sema.print);
-	}
-	i = -1;
-	while (++i < philo->info.arg.n_philo)
-		kill(philo->info.pid[i], SIGKILL);
-	sem_close(philo->info.sema.eat_checker);
-	sem_unlink("eat_checker");
-	return (NULL);
-}
-
-int	init_info(int argc, t_philo *philo, t_info *info, t_arg *arg)
-{
-	int	idx;
-
-	sem_unlink("sem_fork");
-	info->sema.fork = sem_open("sem_fork", O_CREAT | O_EXCL, 0644 \
-			, arg->n_philo);
-	sem_unlink("sem_print");
-	info->sema.print = sem_open("sem_print", O_CREAT | O_EXCL, 0644, 1);
-	sem_unlink("sem_eat_checker");
-	if (argc == 6)
-		info->sema.eat_checker = sem_open("sem_eat_checker", O_CREAT | O_EXCL \
-				, 0644, 0);
-	idx = 0;
-	info->birth_t = get_time();
-	while (idx < info->arg.n_philo)
-	{
-		info->pid[idx] = fork();
-		if (info->pid[idx] == 0)
-			action(*philo);
-		philo->idx = ++idx;
-	}
-	return (SUCCESS);
-}
 
 static int	parse_arg(int argc, char **argv, t_info *info)
 {
@@ -82,7 +35,54 @@ static int	parse_arg(int argc, char **argv, t_info *info)
 	return (SUCCESS);
 }
 
-void	sema_fclean(t_info *info, t_sem *sema, t_arg *arg)
+static int	init_info(int argc, t_philo *philo, t_info *info, t_arg *arg)
+{
+	int	idx;
+
+	sem_unlink("sem_fork");
+	info->sema.fork = sem_open("sem_fork", O_CREAT | O_EXCL, 0644 \
+			, arg->n_philo);
+	sem_unlink("sem_print");
+	info->sema.print = sem_open("sem_print", O_CREAT | O_EXCL, 0644, 1);
+	sem_unlink("sem_eat_checker");
+	if (argc == 6)
+		info->sema.eat_checker = sem_open("sem_eat_checker", O_CREAT | O_EXCL \
+				, 0644, 0);
+	idx = 0;
+	info->birth_t = get_time();
+	while (idx < info->arg.n_philo)
+	{
+		info->pid[idx] = fork();
+		if (info->pid[idx] == 0)
+			action(*philo);
+		philo->idx = ++idx;
+	}
+	return (SUCCESS);
+}
+
+static void	*eat_checker(void *param)
+{
+	int		i;
+	t_philo	*philo;
+
+	philo = (t_philo *)param;
+	i = -1;
+	while (++i < philo->info.arg.n_philo)
+	{
+		sem_wait(philo->info.sema.eat_checker);
+		if (i + 1 == philo->info.arg.n_philo)
+			break ;
+		sem_post(philo->info.sema.print);
+	}
+	i = -1;
+	while (++i < philo->info.arg.n_philo)
+		kill(philo->info.pid[i], SIGKILL);
+	sem_close(philo->info.sema.eat_checker);
+	sem_unlink("sem_eat_checker");
+	return (NULL);
+}
+
+static void	sema_fclean(t_info *info, t_sem *sema, t_arg *arg)
 {
 	int	i;
 
@@ -91,12 +91,12 @@ void	sema_fclean(t_info *info, t_sem *sema, t_arg *arg)
 	while (++i < arg->n_philo)
 		kill(info->pid[i], SIGKILL);
 	sem_close(sema->fork);
-	sem_close(sema->print);
 	sem_unlink("sem_fork");
+	sem_close(sema->print);
 	sem_unlink("sem_print");
-	free(info->pid);
 	while (--i)
 		waitpid(-1, 0, 0);
+	free(info->pid);
 }
 
 int	main(int argc, char **argv)

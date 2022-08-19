@@ -6,13 +6,12 @@
 /*   By: minsuki2 <minsuki2@student.42seoul.kr      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/20 02:49:10 by minsuki2          #+#    #+#             */
-/*   Updated: 2022/08/20 02:50:19 by minsuki2         ###   ########.fr       */
+/*   Updated: 2022/08/20 03:31:39 by minsuki2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILO_H
 # define PHILO_H
-# include <string.h>
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
@@ -27,12 +26,6 @@ typedef struct s_status
 	int	n_full;
 }	t_status;
 
-typedef struct s_mutex
-{
-	pthread_mutex_t	*fork;
-	pthread_mutex_t	print;
-}	t_mutex;
-
 typedef struct s_arg
 {
 	int	n_philo;
@@ -44,10 +37,10 @@ typedef struct s_arg
 
 typedef struct s_info
 {
-	t_arg		arg;
-	t_mutex		mutex;
-	t_status	stat;
-	size_t		birth_t;
+	t_arg			arg;
+	pthread_mutex_t	mtx_print;
+	t_status		stat;
+	size_t			birth_t;
 }	t_info;
 
 typedef struct s_philo
@@ -71,7 +64,7 @@ enum e_enum
 size_t		get_time(void);
 void		smart_timer(int time);
 void		monitor(t_philo *philo);
-void		mutex_free(t_philo *philo, t_mutex *mutex);
+void		mutex_free(t_philo *philo, t_info *info, t_arg *arg);
 void		*action(void *param);
 int			ft_postive_atoi(const char *str);
 int			ft_error(char *str);

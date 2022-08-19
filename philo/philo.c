@@ -6,7 +6,7 @@
 /*   By: minsuki2 <minsuki2@student.42seoul.kr      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/17 07:55:23 by minsuki2          #+#    #+#             */
-/*   Updated: 2022/08/17 15:04:00 by minsuki2         ###   ########.fr       */
+/*   Updated: 2022/08/20 03:36:33 by minsuki2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,11 @@ static int	init_mutex(t_info *info, pthread_mutex_t **fork)
 	*fork = malloc(sizeof(pthread_mutex_t) * info->arg.n_philo);
 	if (!(*fork))
 		return (ERROR);
-	(*info).mutex.fork = *fork;
 	i = -1;
 	while (++i < info->arg.n_philo)
 		if (pthread_mutex_init(&(*fork)[i], PTHREAD_MUTEX_NORMAL) != 0)
 			return (ERROR);
-	if (pthread_mutex_init(&info->mutex.print, PTHREAD_MUTEX_NORMAL) != 0)
+	if (pthread_mutex_init(&info->mtx_print, PTHREAD_MUTEX_NORMAL) != 0)
 		return (ERROR);
 	return (SUCCESS);
 }
@@ -48,13 +47,13 @@ static int	init_philo(t_philo **philo, t_info *info, t_arg *arg
 		(*philo)[i].last_eat_t = get_time();
 		++i;
 	}
-	pthread_mutex_lock(&info->mutex.print);
+	pthread_mutex_lock(&info->mtx_print);
 	i = -1;
 	while (++i < arg->n_philo)
 		if (pthread_create(&(*philo)[i].tid, NULL, action, &(*philo)[i]))
 			return (ERROR);
 	info->birth_t = get_time();
-	pthread_mutex_unlock(&info->mutex.print);
+	pthread_mutex_unlock(&info->mtx_print);
 	return (SUCCESS);
 }
 
@@ -87,21 +86,18 @@ static int	parse_arg(int argc, char **argv, t_info *info)
 	info->arg.must_eat = 0;
 	if (argc == 6)
 	{
-		info->arg.must_eat = atoi(argv[5]);
+		info->arg.must_eat = ft_postive_atoi(argv[5]);
 		if (info->arg.must_eat <= 0)
 			return (ft_error("must_eat_n argument"));
 	}
 	return (SUCCESS);
 }
 
-/* void	only_exit(); */
-
 int	main(int argc, char **argv)
 {
 	int		i;
 	t_info	info;
 	t_philo	*philo;
-	/* atexit(only_exit); */
 
 	if (parse_arg(argc, argv, &info) == ERROR)
 		return (ERROR);
@@ -113,11 +109,6 @@ int	main(int argc, char **argv)
 	i = -1;
 	while (++i < philo->info->arg.n_philo)
 		pthread_join(philo[i].tid, NULL);
-	mutex_free(philo, &philo->info->mutex);
+	mutex_free(philo, philo->info, &philo->info->arg);
 	return (0);
 }
-
-/* void	only_exit(void) */
-/* { */
-	/* system("leaks -q philo"); */
-/* } */

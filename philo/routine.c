@@ -6,7 +6,7 @@
 /*   By: minsuki2 <minsuki2@student.42seoul.kr      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/17 07:56:13 by minsuki2          #+#    #+#             */
-/*   Updated: 2022/08/20 02:48:36 by minsuki2         ###   ########.fr       */
+/*   Updated: 2022/08/20 03:25:37 by minsuki2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ static int	philo_print(t_philo *philo, int idx, char *str, int eat_status)
 {
 	size_t	now_t;
 
-	pthread_mutex_lock(&philo->info->mutex.print);
+	pthread_mutex_lock(&philo->info->mtx_print);
 	if (philo->info->stat.end == 0)
 	{
 		now_t = get_time();
@@ -34,10 +34,10 @@ static int	philo_print(t_philo *philo, int idx, char *str, int eat_status)
 	}
 	else
 	{
-		pthread_mutex_unlock(&philo->info->mutex.print);
+		pthread_mutex_unlock(&philo->info->mtx_print);
 		return (ERROR);
 	}
-	pthread_mutex_unlock(&philo->info->mutex.print);
+	pthread_mutex_unlock(&philo->info->mtx_print);
 	return (SUCCESS);
 }
 
@@ -90,9 +90,9 @@ void	*action(void *param)
 	t_philo	*philo;
 
 	philo = (t_philo *)param;
-	pthread_mutex_lock(&philo->info->mutex.print);
+	pthread_mutex_lock(&philo->info->mtx_print);
 	(*philo).last_eat_t = get_time();
-	pthread_mutex_unlock(&philo->info->mutex.print);
+	pthread_mutex_unlock(&philo->info->mtx_print);
 	if (philo->idx % 2 != 0)
 		smart_timer(philo->info->arg.eat_time / 2);
 	while (!take_fork(philo)

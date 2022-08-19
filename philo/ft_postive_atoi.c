@@ -6,7 +6,7 @@
 /*   By: minsuki2 <minsuki2@student.42seoul.kr      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/07/05 08:17:04 by minsuki2          #+#    #+#             */
-/*   Updated: 2022/08/17 09:24:58 by minsuki2         ###   ########.fr       */
+/*   Updated: 2022/08/20 03:14:19 by minsuki2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,8 +60,3 @@ int	ft_postive_atoi(const char *str)
 	}
 	return (sign * num);
 }
-
-/* int main(int ac, char *av[]) */
-/* { */
-	/* printf("%d\n", ft_postive_atoi(av[1])); */
-/* } */
