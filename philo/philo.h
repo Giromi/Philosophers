@@ -1,13 +1,23 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo.h                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: minsuki2 <minsuki2@student.42seoul.kr      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/08/20 02:49:10 by minsuki2          #+#    #+#             */
+/*   Updated: 2022/08/20 02:50:19 by minsuki2         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef PHILO_H
 # define PHILO_H
-
 # include <string.h>
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
 # include <sys/time.h>
 # include <pthread.h>
-
 # define VAL_INT_MAX			2147483647
 # define VAL_INT_MIN			2147483648
 
@@ -20,23 +30,23 @@ typedef struct s_status
 typedef struct s_mutex
 {
 	pthread_mutex_t	*fork;
-	pthread_mutex_t print;
+	pthread_mutex_t	print;
 }	t_mutex;
 
 typedef struct s_arg
 {
 	int	n_philo;
-	int die_time;
-	int eat_time;
-	int sleep_time;
-	int must_eat;
+	int	die_time;
+	int	eat_time;
+	int	sleep_time;
+	int	must_eat;
 }	t_arg;
 
 typedef struct s_info
 {
 	t_arg		arg;
-	t_mutex 	mutex;
-	t_status 	stat;
+	t_mutex		mutex;
+	t_status	stat;
 	size_t		birth_t;
 }	t_info;
 
@@ -58,7 +68,7 @@ enum e_enum
 	EATTING
 };
 
-size_t		get_time();
+size_t		get_time(void);
 void		smart_timer(int time);
 void		monitor(t_philo *philo);
 void		mutex_free(t_philo *philo, t_mutex *mutex);

@@ -6,7 +6,7 @@
 /*   By: minsuki2 <minsuki2@student.42seoul.kr      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/17 07:56:13 by minsuki2          #+#    #+#             */
-/*   Updated: 2022/08/17 14:49:41 by minsuki2         ###   ########.fr       */
+/*   Updated: 2022/08/20 02:48:36 by minsuki2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,21 +81,22 @@ static int	sleep_thinking(t_philo *philo, t_arg *arg)
 	smart_timer(arg->sleep_time);
 	if (philo_print(philo, philo->idx, "is thinking", 0))
 		return (ERROR);
+	usleep(50);
 	return (SUCCESS);
 }
 
 void	*action(void *param)
 {
 	t_philo	*philo;
-	philo = (t_philo *)param;
 
+	philo = (t_philo *)param;
 	pthread_mutex_lock(&philo->info->mutex.print);
 	(*philo).last_eat_t = get_time();
 	pthread_mutex_unlock(&philo->info->mutex.print);
 	if (philo->idx % 2 != 0)
 		smart_timer(philo->info->arg.eat_time / 2);
 	while (!take_fork(philo)
-		 && !eating(philo, &philo->info->arg)
-		 && !sleep_thinking(philo, &philo->info->arg));
+		&& !eating(philo, &philo->info->arg)
+		&& !sleep_thinking(philo, &philo->info->arg));
 	return (NULL);
 }

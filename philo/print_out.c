@@ -6,7 +6,7 @@
 /*   By: minsuki2 <minsuki2@student.42seoul.kr      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/17 08:40:39 by minsuki2          #+#    #+#             */
-/*   Updated: 2022/08/17 08:51:40 by minsuki2         ###   ########.fr       */
+/*   Updated: 2022/08/20 02:48:49 by minsuki2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,4 +41,3 @@ int	ft_error(char *str)
 	ft_putendl_fd(str, 2);
 	return (ERROR);
 }
-
