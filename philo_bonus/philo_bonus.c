@@ -6,7 +6,7 @@
 /*   By: minsuki2 <minsuki2@student.42seoul.kr      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 23:36:51 by minsuki2          #+#    #+#             */
-/*   Updated: 2022/08/20 01:55:36 by minsuki2         ###   ########.fr       */
+/*   Updated: 2022/08/20 02:40:19 by minsuki2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ static int	parse_arg(int argc, char **argv, t_info *info)
 	info->arg.must_eat = 0;
 	if (argc == 6)
 	{
-		info->arg.must_eat = atoi(argv[5]);
+		info->arg.must_eat = ft_postive_atoi(argv[5]);
 		if (info->arg.must_eat <= 0)
 			return (ft_error("must_eat_n argument"));
 	}
