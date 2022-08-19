@@ -110,7 +110,6 @@ void action(t_philo philo)
 {
 	pthread_t	tid;
 
-	tid = NULL;
 	//pthread_create(&tid, NULL, monitor, &philo);
 	// sem_wait(philo.info.sema.print);
 	philo.last_eat_t = get_time();
@@ -163,8 +162,11 @@ int	parse_arg(int argc, char **argv, t_info *info)
 	return (SUCCESS);
 }
 
+void only_exit();
+
 int	main(int argc, char **argv)
 {
+	atexit(only_exit);
 	int			idx;
 	pid_t		*pid;
 	t_philo		philo;
@@ -188,7 +190,7 @@ int	main(int argc, char **argv)
 	}
 	philo.info.pid = pid;
 	// sem_post(philo.info.sema.print);
-	
+
 	if (argc == 6)
 	{
 		pthread_create(&tid_eatchecker, NULL, eat_checker, &philo);
@@ -210,4 +212,9 @@ int	main(int argc, char **argv)
 	while (idx--)		// n - 1번
 		waitpid(-1, 0, 0);
 	return (0);
+}
+
+void only_exit()
+{
+	system("leak -q philo_bonus");
 }

@@ -1,6 +1,8 @@
 #ifndef PHILO_H
 # define PHILO_H
 
+# include <sys/wait.h>
+# include <fcntl.h>
 # include <string.h>
 # include <stdio.h>
 # include <stdlib.h>

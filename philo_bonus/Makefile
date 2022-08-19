@@ -10,7 +10,7 @@ SRCS = philo_bonus.c ft_atoi.c
 OBJS = $(SRCS:.c=.o)
 
 $(NAME): $(OBJS)
-	$(CC) $(CFLAGS) -lpthread $(OBJS) -o $(NAME)
+	$(CC) $(CFLAGS) $(OBJS) -lpthread -o $(NAME)
 
 %.o : %.c
 	$(CC) $(CFLAGS) -g -c $< -o $@
